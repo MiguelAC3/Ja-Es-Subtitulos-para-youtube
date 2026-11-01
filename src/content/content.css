@@ -1,0 +1,392 @@
+#movie_player.ytj-active .ytp-caption-window-container,
+#movie_player.ytj-active .caption-window {
+  display: none !important;
+}
+
+/* Abajo del video; sube por encima de la barra cuando se ven los controles. */
+.ytj-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 4%;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  pointer-events: none;
+  text-align: center;
+  transition: bottom 0.2s ease;
+  /* cqw = % del ancho del reproductor, no de la ventana. */
+  container-type: inline-size;
+  /* Opciones de la tuerca; index.ts las sobrescribe en línea. */
+  --ytj-bg-opacity: 0.45;
+  --ytj-font-scale: 1;
+}
+
+.ytj-overlay[hidden],
+.ytj-panel[hidden],
+.ytj-phrase-bar[hidden] {
+  display: none !important;
+}
+
+#movie_player:not(.ytp-autohide) .ytj-overlay {
+  bottom: 64px;
+}
+
+#movie_player.ytp-big-mode:not(.ytp-autohide) .ytj-overlay {
+  bottom: 96px;
+}
+
+/* El reproductor desactiva la selección; el texto debe poder seleccionarse
+   y recibir el ratón para que Yomitan lo escanee. */
+.ytj-line {
+  max-width: 85%;
+  padding: 2px 12px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, var(--ytj-bg-opacity));
+  color: #fff;
+  /* Con el fondo más claro, la sombra mantiene el texto legible sobre fondos claros. */
+  text-shadow:
+    0 0 3px rgba(0, 0, 0, 0.9),
+    0 1px 2px rgba(0, 0, 0, 0.9);
+  font-family: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", Meiryo, sans-serif;
+  pointer-events: auto;
+  cursor: text;
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+.ytj-line:empty {
+  display: none;
+}
+
+.ytj-ja {
+  font-size: calc(clamp(16px, 2.8cqw, 44px) * var(--ytj-font-scale));
+  line-height: 1.9;
+}
+
+/* Palabras con contenido: clic = conocida ↔ desconocida. */
+.ytj-word {
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.ytj-word:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.ytj-unknown {
+  color: #c9a7ff;
+}
+
+.ytj-learning {
+  color: #ffb877;
+}
+
+/* Expresiones (気を付ける, かもしれない…): subrayado morado si no se conocen y
+   naranja si están para aprender; una vez conocidas, sus palabras cuentan como
+   conocidas. El borde va en cada unidad para que se oculte con las palabras que
+   aún no se han dicho. */
+.ytj-expr-unknown > .ytj-unit {
+  border-bottom: 2px solid rgba(201, 167, 255, 0.85);
+}
+
+.ytj-expr-learning > .ytj-unit {
+  border-bottom: 2px solid rgba(255, 184, 119, 0.9);
+}
+
+/* Botones que aparecen encima de una selección de varias palabras; el del
+   estado actual queda relleno. */
+.ytj-phrase-bar {
+  position: absolute;
+  z-index: 70;
+  display: flex;
+  gap: 6px;
+  transform: translate(-50%, -100%);
+}
+
+.ytj-phrase-button {
+  padding: 6px 12px;
+  border: 2px solid;
+  border-radius: 14px;
+  background: rgba(28, 28, 28, 0.92);
+  font: 500 13px/1 Roboto, Arial, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.ytj-phrase-known {
+  border-color: #fff;
+  color: #fff;
+}
+
+.ytj-phrase-learning {
+  border-color: #ffb877;
+  color: #ffb877;
+}
+
+.ytj-phrase-known[aria-pressed="true"] {
+  background: #fff;
+  color: #000;
+}
+
+.ytj-phrase-learning[aria-pressed="true"] {
+  background: #ffb877;
+  color: #000;
+}
+
+.ytj-phrase-button[aria-pressed="true"]::before {
+  content: "✓ ";
+}
+
+/* Subtítulos automáticos: lo que aún no se ha dicho ocupa su sitio sin verse. */
+.ytj-unsaid {
+  visibility: hidden;
+}
+
+/* La lectura no se copia al seleccionar. */
+.ytj-ja rt {
+  font-size: 0.5em;
+  color: #ffd666;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Las palabras conocidas no llevan furigana; aparece al pasar el ratón. Con
+   visibility conserva su hueco y la línea no salta al mostrarse. */
+.ytj-known rt {
+  visibility: hidden;
+}
+
+.ytj-known:hover rt {
+  visibility: visible;
+}
+
+.ytj-es {
+  font-size: calc(clamp(13px, 2cqw, 30px) * var(--ytj-font-scale));
+  line-height: 1.5;
+  color: #e3eaf2;
+}
+
+#movie_player:not(.ytj-active) .ytj-es-button,
+#movie_player:not(.ytj-active) .ytj-nav {
+  display: none;
+}
+
+/* Flechas línea siguiente / repetir / anterior a la izquierda del video; como en
+   LR, siempre visibles aunque se oculten los controles de YouTube. */
+.ytj-nav {
+  position: absolute;
+  top: 50%;
+  left: 8px;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transform: translateY(-50%);
+}
+
+.ytj-nav-button {
+  opacity: 0.75;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.8));
+}
+
+.ytj-nav-button:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.ytj-nav-button svg {
+  width: 30px;
+  height: 30px;
+  fill: #fff;
+}
+
+.ytj-es-button {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Igual que el icono de CC de la barra nueva: relleno = activo, contorno = apagado.
+   El estilo va en el span porque YouTube sobrescribe opacidad y ::after del botón. */
+.ytj-es-label {
+  padding: 3px 4px;
+  border: 2px solid #fff;
+  border-radius: 4px;
+  color: #fff;
+  font: 700 11px/1 Roboto, Arial, sans-serif;
+  letter-spacing: 0.5px;
+}
+
+.ytj-es-button[aria-pressed="true"] .ytj-es-label {
+  background: #fff;
+  color: #000;
+}
+
+/* Interruptor JapanRefactor + tuerca, junto al minutero (como Language Reactor). */
+.ytj-controls {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  margin-left: 4px;
+  vertical-align: top;
+}
+
+.ytj-switch,
+.ytj-gear {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  width: auto !important;
+}
+
+.ytj-switch {
+  gap: 6px;
+  padding: 0 6px !important;
+}
+
+.ytj-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #bc002d;
+  color: #fff;
+  font: 700 13px/1 "Yu Gothic", "Hiragino Sans", Meiryo, "Noto Sans JP", sans-serif;
+  box-shadow: inset 0 0 0 2px #fff;
+}
+
+.ytj-switch-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 42px;
+  height: 20px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.3);
+  transition: background 0.15s ease;
+}
+
+.ytj-switch-text {
+  position: absolute;
+  right: 6px;
+  color: #fff;
+  font: 700 9px/1 Roboto, Arial, sans-serif;
+}
+
+.ytj-switch-knob {
+  position: absolute;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  transition: left 0.15s ease;
+}
+
+.ytj-switch[aria-checked="true"] .ytj-switch-track {
+  background: #bc002d;
+}
+
+.ytj-switch[aria-checked="true"] .ytj-switch-text {
+  right: auto;
+  left: 6px;
+}
+
+.ytj-switch[aria-checked="true"] .ytj-switch-knob {
+  left: 24px;
+}
+
+.ytj-gear {
+  padding: 0 4px !important;
+}
+
+.ytj-gear svg {
+  width: 22px;
+  height: 22px;
+  fill: #fff;
+}
+
+.ytj-panel {
+  position: absolute;
+  z-index: 70;
+  width: 240px;
+  padding: 12px 16px 14px;
+  border-radius: 12px;
+  background: rgba(28, 28, 28, 0.92);
+  color: #fff;
+  font: 400 13px/1.4 Roboto, Arial, sans-serif;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.ytj-panel-title {
+  margin-bottom: 8px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.ytj-panel-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  row-gap: 2px;
+  margin-top: 8px;
+  cursor: default;
+}
+
+.ytj-panel-value {
+  color: #aaa;
+  font-variant-numeric: tabular-nums;
+}
+
+.ytj-panel-info {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.ytj-panel-hint {
+  margin-top: 4px;
+  color: #aaa;
+  font-size: 12px;
+}
+
+.ytj-panel-credits {
+  margin-top: 8px;
+  font-size: 11px;
+  color: #888;
+}
+
+.ytj-panel-check {
+  align-items: center;
+  column-gap: 12px;
+  cursor: pointer;
+}
+
+.ytj-panel-checkbox {
+  margin: 0;
+  accent-color: #bc002d;
+  cursor: pointer;
+}
+
+.ytj-panel-slider {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 4px 0 0;
+  accent-color: #bc002d;
+  cursor: pointer;
+}

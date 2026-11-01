@@ -1,0 +1,6 @@
+node_modules/
+# Se genera con `npm run build`.
+dist/
+*.zip
+# Ilustración del icono anterior: sin licencia clara, no se publica.
+image.png
