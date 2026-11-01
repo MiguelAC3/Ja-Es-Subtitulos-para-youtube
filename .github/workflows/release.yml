@@ -1,0 +1,51 @@
+# Al subir una etiqueta de versión (por ejemplo v0.4.0), compila la extensión y
+# publica JapanRefactor.zip en Releases, listo para cargar sin instalar Node.js:
+#
+#   git tag v0.4.0
+#   git push origin v0.4.0
+#
+# La etiqueta debe coincidir con "version" en manifest.json.
+name: Publicar versión
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Comprobar que la etiqueta coincide con el manifest
+        run: |
+          version="v$(node -p "require('./manifest.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "La etiqueta $GITHUB_REF_NAME no coincide con manifest.json ($version)"
+            exit 1
+          fi
+
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+      - name: Empaquetar
+        run: |
+          cp scripts/actualizar.bat dist/
+          cd dist && zip -r ../JapanRefactor.zip . -x "*.map"
+
+      - name: Publicar en Releases
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >
+          gh release create "$GITHUB_REF_NAME" JapanRefactor.zip
+          --title "JapanRefactor $GITHUB_REF_NAME"
+          --generate-notes

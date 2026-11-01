@@ -32,6 +32,23 @@ Las palabras se guardan en el propio navegador y se mantienen al cerrarlo o rein
 
 Funciona en navegadores basados en Chromium: Chrome, Brave, Edge, Opera, Vivaldi.
 
+### Descargar la versión publicada (recomendado)
+
+No hace falta instalar nada más.
+
+1. Descarga `JapanRefactor.zip` de la [última versión](https://github.com/MiguelAC3/Ja-Es-Subtitulos-para-youtube/releases/latest).
+2. Descomprímelo en una carpeta fija, por ejemplo `Documentos\JapanRefactor`.
+3. Abre `chrome://extensions` (o `brave://extensions`, `edge://extensions`).
+4. Activa el **Modo de desarrollador** (arriba a la derecha).
+5. Pulsa **Cargar descomprimida** y elige esa carpeta.
+6. Abre un video de YouTube con subtítulos en japonés.
+
+> **Importante:** no muevas ni borres la carpeta después de cargarla, y deja activado el Modo de desarrollador. El navegador lee la extensión desde esa carpeta; si la cargas desde otra ubicación, la trata como otra extensión y pierdes las palabras guardadas.
+
+**Actualizar (Windows):** haz doble clic en `actualizar.bat`, dentro de la carpeta de la extensión. Descarga la última versión en esa misma carpeta, así que tus palabras se conservan. Después pulsa ⟳ en la página de extensiones y recarga las pestañas de YouTube (F5).
+
+En otros sistemas, descarga el ZIP nuevo, descomprímelo sobre la misma carpeta y pulsa ⟳.
+
 ### Desde el código
 
 Requisitos: [Node.js](https://nodejs.org/) 20 o superior.
@@ -43,28 +60,7 @@ npm install
 npm run build
 ```
 
-Esto genera la carpeta `dist/`, que es la extensión. Para cargarla:
-
-1. Abre `chrome://extensions` (o `brave://extensions`, `edge://extensions`).
-2. Activa el **Modo de desarrollador** (arriba a la derecha).
-3. Pulsa **Cargar descomprimida** y elige la carpeta `dist/`.
-4. Abre un video de YouTube con subtítulos en japonés.
-
-### Con la extensión ya compilada
-
-Si tienes la carpeta `dist/` ya compilada (por ejemplo, en un ZIP), no hace falta Node.js: descomprímela en una ubicación fija y cárgala como en los pasos 1–3.
-
-> **Importante:** no muevas ni borres la carpeta después de cargarla. El navegador la lee desde ahí, y si la cargas desde otra ubicación la trata como otra extensión y pierdes las palabras guardadas.
-
-### Actualizar
-
-```bash
-git pull
-npm install
-npm run build
-```
-
-Después pulsa ⟳ en la página de extensiones y recarga las pestañas de YouTube (F5).
+Esto genera la carpeta `dist/`, que es la extensión; cárgala como en los pasos 3–5 de arriba. Para actualizar: `git pull`, `npm install`, `npm run build`, y después ⟳ en la página de extensiones y F5 en YouTube.
 
 ## Desarrollo
 
@@ -79,6 +75,20 @@ Estructura:
 - `src/content/`: interfaz, furigana (kuromoji), agrupación de palabras y expresiones (JMdict) y palabras guardadas.
 - `src/shared/`: formato de los subtítulos, común a ambas partes.
 - `scripts/build-jmdict.mjs` y `data/jmdict.tsv.gz`: índice compacto de JMdict que usa la extensión.
+- `scripts/actualizar.bat`: actualizador que va dentro del ZIP de cada versión.
+- `.github/workflows/release.yml`: compila y publica el ZIP en Releases.
+
+Para publicar una versión nueva en Releases:
+
+1. Sube el número de `version` en `manifest.json` y `package.json`, y haz commit y push.
+2. Crea y sube la etiqueta de esa versión:
+
+   ```bash
+   git tag v0.5.0
+   git push origin v0.5.0
+   ```
+
+GitHub Actions compila la extensión y publica `JapanRefactor.zip` en Releases (ver `.github/workflows/release.yml`).
 
 Para actualizar JMdict, descarga el `jmdict-eng-*.json` más reciente de [jmdict-simplified](https://github.com/scriptin/jmdict-simplified/releases) y ejecuta:
 
